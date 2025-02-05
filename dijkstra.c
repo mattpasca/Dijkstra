@@ -49,6 +49,10 @@ int* dijkstra (int* graph, int DIM, int start_node, int end_node){
     int increment;
     int modulo_count;
     for(current_node=start_node; current_node<max_count; ++current_node){
+        /* The idea behind this loop is wrong. Counter-example:
+         * DIM=10, start_node=5, end_node=6, path=(5,1,2,3,6)
+         * but the algorithm would deliver increment=0,1 and terminate.
+         */
         for(increment=0; increment<abs(start_node-max_count); ++increment){
             modulo_count = (start_node + increment)%DIM;
             if(graph[DIM*(current_node%DIM)+modulo_count]>0 &&
