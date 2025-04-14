@@ -57,7 +57,6 @@ int* dijkstra (int* graph, int DIM, int start_node, int end_node){
     int step;
     int current_node;
     for(step=0; step<DIM; ++step){
-        // Maybe this for(){if({})} could be replaced by a list?
         for(current_node=0; current_node<DIM; ++current_node){
             if(nodes[current_node].dist==step){
                 for(int j=0; j<DIM; ++j){
