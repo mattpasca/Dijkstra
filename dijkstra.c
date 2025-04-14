@@ -1,43 +1,54 @@
 /* Basic implementation of Dijkstra's algorithm.
  * A graph is represented as a (symmetric) matrix (the so called adjacency matrix)
- * A path is represented as an (ordered) array listing the sequence of labels of the nodes the path consists of.
- *
-TODO output an actual path
-
-ISSUE Path is just a list of the nodes ordered by distance to start_node.
-      Example: edges = [(1, 2), (1,2025), (2, 3), (2,4), (3,4)]
-               --> path = [00...0 1 2 2025 0]
-
-
+ * A path is represented as an array listing the sequence of labels of the nodes the path consists of.
+ * 
+ * 
  * --- gcc -shared -o dijkstra.so -fPIC dijkstra.c ---
  */
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
-struct Node{
+struct node{
     int label;
     int dist;
+    int previous;
 };
 
-// For the qsort function from <stdio.h>
-int compare(const void *a, const void *b){
-    const struct Node* node_a = (const struct Node*) a;
-    const struct Node* node_b = (const struct Node*) b;
-    return node_a->dist - node_b->dist;
+typedef struct node Node;
+
+void path_extractor(Node* nodes, int end_node, int* result_path){
+    bool running;
+    int next_node;
+    int i;
+
+    result_path[0] = end_node;
+    next_node = nodes[end_node].previous;
+    running = true;
+    i = 1;
+    while(running==true){
+        if(nodes[next_node].dist==0){
+            running = false;
+        }
+        result_path[i] = next_node;
+        next_node = nodes[result_path[i]].previous;
+        i += 1;
+    }
+
 }
 
 int* dijkstra (int* graph, int DIM, int start_node, int end_node){
-    struct Node* nodes;
-    int* path;
-    nodes = calloc(DIM, sizeof(struct Node));
-    path = calloc(DIM, sizeof(int));
+    Node* nodes;
+    int* result_path;
+    nodes = calloc(DIM, sizeof(Node));
+    result_path = calloc(DIM, sizeof(int));
 
-    // Initialize distances
+    // Initialize nodes
     for(int i=0; i<DIM; ++i){
         nodes[i].label = i;
         if(i!=start_node){
-            nodes[i].dist = -2;
+            nodes[i].dist = -2; // how do you construct an 'infinity' object?
         }else{
             nodes[i].dist = 0;
         }
@@ -54,19 +65,15 @@ int* dijkstra (int* graph, int DIM, int start_node, int end_node){
                     (nodes[j].dist<0 ||
                     nodes[current_node].dist+1<nodes[j].dist)){
                             nodes[j].dist = nodes[current_node].dist+1;
+                            nodes[j].previous = nodes[current_node].label;
                     }
                 }
             }
         }
     }
-    qsort(nodes, DIM, sizeof(struct Node), compare);
-    for(int i=0; i<DIM; ++i){
-        if(nodes[i].dist>=0 && nodes[i].dist<nodes[end_node].dist){
-            path[i] = nodes[i].label;
-        }
-    }
+    path_extractor(nodes, end_node, result_path);
     free(nodes);
-    return path;
+    return result_path;
 }
 
 void free_pointer(int* ptr){
